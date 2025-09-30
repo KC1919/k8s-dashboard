@@ -1,0 +1,30 @@
+{
+  "apiVersion": "networking.k8s.io/v1",
+  "kind": "Ingress",
+  "metadata": { "name": "{{ingressName}}" },
+  "spec": {
+    "rules": [
+      {{#each rules}}
+      {
+        "host": "{{this.host}}",
+        "http": {
+          "paths": [
+            {{#each this.paths}}
+            {
+              "path": "{{this.path}}",
+              "pathType": "Prefix",
+              "backend": {
+                "service": {
+                  "name": "{{this.serviceName}}",
+                  "port": { "number": {{this.servicePort}} }
+                }
+              }
+            }{{#unless @last}},{{/unless}}
+            {{/each}}
+          ]
+        }
+      }{{#unless @last}},{{/unless}}
+      {{/each}}
+    ]
+  }
+}
