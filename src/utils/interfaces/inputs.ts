@@ -13,3 +13,15 @@ export interface DeploymentPatch {
     path: string,
     value: string | number
 }
+
+export interface ServiceInput {
+    name: string,
+    serviceType: string,
+    appName: string,
+    ports: Array<{
+        protocol: string,
+        port: number,
+        targetPort: number
+        nodeport?: number
+    }>,
+}

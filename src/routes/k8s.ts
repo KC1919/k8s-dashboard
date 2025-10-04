@@ -10,9 +10,11 @@ router
     .get('/containers/:namespace/:podname', k8s.getContainerDetails)
     .get('/namespaces', k8s.listNamespaces)
     .get('/deployments/:namespace', k8s.listDeployments)
+    .get('/services/:namespace', k8s.listServices)
     .post('/namespaces/create', k8s.createNamespace)
     .post('/deployments/create', k8s.createDeployment)
     .patch('/deployments/update', k8s.patchDeployment)
+    .post('/services/create', k8s.createService)
 
 
 export default router;

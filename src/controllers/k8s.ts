@@ -112,6 +112,32 @@ class K8sController {
             });
         }
     }
+
+    public listServices = async (req: Request, res: Response) => {
+        try {
+            const { namespace } = req.params
+            const result = await this.k8s.listServices(namespace as string);
+            return res.status(200).json({
+                result
+            });
+        } catch (error) {
+            console.log("Failed to list services");
+            res.status(500).json({ error })
+        }
+    }
+
+    public createService = async (req: Request, res: Response) => {
+        try {
+            const { namespace, serviceData } = req.body
+            const result = await this.k8s.createService(namespace, serviceData);
+            return res.status(200).json({
+                result
+            });
+        } catch (error) {
+            console.log("Failed to create service");
+            res.status(500).json({ error })
+        }
+    }
 }
 
 

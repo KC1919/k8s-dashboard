@@ -1,5 +1,5 @@
 import * as k8s from "@kubernetes/client-node";
-import { DeploymentInput, DeploymentPatch } from "../utils/interfaces/inputs.js";
+import { DeploymentInput, DeploymentPatch, ServiceInput } from "../utils/interfaces/inputs.js";
 import { renderTemplate } from "../utils/render_template.js";
 
 class K8sService {
@@ -63,7 +63,7 @@ class K8sService {
 
             const namespaces = await this.listNamespace();
 
-            if (namespaces.indexOf(namespace)) {
+            if (namespaces.indexOf(namespace) > 0) {
                 throw new Error("Namespace already exist!");
             }
 
@@ -79,7 +79,11 @@ class K8sService {
         }
     }
 
-    public async listDeployments(namespace: string) {
+    // =============================DEPLOYMENTS============================= 
+
+
+    // list all deployments in a namespace
+    public async listDeployments(namespace: string): Promise<k8s.V1Deployment[]> {
         try {
 
             const namespaces = await this.listNamespace();
@@ -113,12 +117,13 @@ class K8sService {
         }
     }
 
+    // create new deployment
     public async createDeployment(namespace: string, data: DeploymentInput) {
         try {
             // check if deployment already exist
             const deployments = await this.listDeploymentNames(namespace);
 
-            if (deployments.indexOf(data.name)) {
+            if (deployments.indexOf(data.name) > 0) {
                 console.log("Deployment with this name already exist");
                 return;
             }
@@ -132,6 +137,7 @@ class K8sService {
         }
     }
 
+    // handle deployment updates
     public async patchDeployment(namespace: string, name: string, patchData: DeploymentPatch) {
         try {
             // fetch deployment to update
@@ -159,6 +165,59 @@ class K8sService {
         } catch (error) {
             console.log("Failed to update deployment", error);
             throw new Error("Failed to update deployment");
+        }
+    }
+
+    // ========================SERVICES====================
+
+
+    // list all services
+    public async listServices(namespace: string) {
+        try {
+            const res = await this.k8sApi.listNamespacedService({ namespace });
+            console.log(res);
+            return res;
+        } catch (error: any) {
+            throw new Error(error);
+        }
+    }
+
+    // list all services
+    public async listAllServiceNames(namespace: string) {
+        try {
+            const res = await this.k8sApi.listNamespacedService({ namespace });
+
+            const serviceNames = res.items.filter((service) => {
+                return service.metadata?.name as string;
+            });
+
+            console.log(serviceNames);
+
+
+            return serviceNames;
+        } catch (error: any) {
+            throw new Error(error);
+        }
+    }
+
+    public async createService(namespace: string, data: ServiceInput) {
+        try {
+            // check if the service exist already
+            const serviceNames = await this.listAllServiceNames(namespace);
+
+            if (data.name && serviceNames.indexOf(data.name) > 0) {
+                throw new Error("Service already exist");
+            }
+
+            const serviceObj: k8s.V1Service = await renderTemplate('../K8s-Dashboard/src/templates/k8s/service.json', data);
+
+            const res = await this.k8sApi.createNamespacedService({ namespace, body: serviceObj });
+
+            return res;
+
+        } catch (error: any) {
+            console.log(error);
+            throw new Error(error);
         }
     }
 }
