@@ -7,8 +7,7 @@ export interface DeploymentInput {
     namespace: string;
 }
 
-export interface DeploymentPatch {
-    name: string;
+export interface PatchInput {
     op: string,
     path: string,
     value: string | number

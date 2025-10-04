@@ -138,6 +138,24 @@ class K8sController {
             res.status(500).json({ error })
         }
     }
+
+    public patchService = async (req: Request, res: Response) => {
+        try {
+            const { namespace, name, patchData } = req.body;
+            const result = await this.k8s.patchService(namespace, name, patchData);
+            res.status(200).json({
+                "message": "Service updated successfully",
+                "status": "success",
+                "data": result
+            });
+        } catch (error) {
+            console.log(error);
+            res.status(500).json({
+                "message": "Failed to update service",
+                "error": error
+            })
+        }
+    }
 }
 
 

@@ -14,6 +14,7 @@ router
     .post('/namespaces/create', k8s.createNamespace)
     .post('/deployments/create', k8s.createDeployment)
     .patch('/deployments/update', k8s.patchDeployment)
+    .patch('/services/update', k8s.patchService)
     .post('/services/create', k8s.createService)
 
 

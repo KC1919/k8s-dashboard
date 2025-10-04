@@ -1,5 +1,5 @@
 import * as k8s from "@kubernetes/client-node";
-import { DeploymentInput, DeploymentPatch, ServiceInput } from "../utils/interfaces/inputs.js";
+import { DeploymentInput, PatchInput, ServiceInput } from "../utils/interfaces/inputs.js";
 import { renderTemplate } from "../utils/render_template.js";
 
 class K8sService {
@@ -138,7 +138,7 @@ class K8sService {
     }
 
     // handle deployment updates
-    public async patchDeployment(namespace: string, name: string, patchData: DeploymentPatch) {
+    public async patchDeployment(namespace: string, name: string, patchData: PatchInput) {
         try {
             // fetch deployment to update
             const deployment = await this.appsApi.readNamespacedDeployment({ namespace, name });
@@ -200,6 +200,7 @@ class K8sService {
         }
     }
 
+    // create service
     public async createService(namespace: string, data: ServiceInput) {
         try {
             // check if the service exist already
@@ -217,6 +218,25 @@ class K8sService {
 
         } catch (error: any) {
             console.log(error);
+            throw new Error(error);
+        }
+    }
+
+    public async patchService(namespace: string, name: string, patchData: PatchInput) {
+        try {
+            // check if the service exist
+            const service = await this.k8sApi.readNamespacedService({ namespace, name });
+
+            if (!service) {
+                throw new Error("Service does not exist");
+            }
+
+            const res = await this.k8sApi.patchNamespacedService({ namespace, name, body: patchData });
+
+            return res;
+
+        } catch (error: any) {
+            console.log("Failed to patch service", error);
             throw new Error(error);
         }
     }
